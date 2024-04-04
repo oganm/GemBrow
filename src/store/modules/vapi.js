@@ -118,6 +118,7 @@ export default vapi
       }
     }
   })
+  .endpoint("searchAnnotations", "annotations", "/annotations/search", {queryParams:true})
   .getStore({
     createStateFn: true // Using modules
   });
