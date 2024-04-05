@@ -148,8 +148,10 @@ function formatTerm(uri) {
  * @param {Map<String,Array<String>>} inferredTermsByCategory
  * @returns {String}
  */
-export function generateFilterDescription(searchSettings, inferredTermsByCategory) {
+export function generateFilterDescription(searchSettings,uriLabelsToUse) {
   const filter = [];
+  let inferredTermsByCategory = uriLabelsToUse
+  debugger
   if (searchSettings.query) {
     filter.push({ key: "Query", value: `"${searchSettings.query}"` });
   }

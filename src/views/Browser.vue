@@ -177,6 +177,7 @@ import { generateFilter, generateFilterDescription, generateFilterSummary } from
 import Error from "@/components/Error.vue";
 import { mapMutations, mapState } from "vuex";
 import CodeSnippet from "@/components/CodeSnippet.vue";
+import axios from "../../node_modules/axios/index"
 
 const MAX_CATEGORIES = 20;
 const MAX_TERMS_PER_CATEGORY = 200;
@@ -215,7 +216,8 @@ export default {
       },
       downloadProgress: null,
       expansionToggle: [],
-      tableWidth: ""
+      tableWidth: "",
+      uriLabels: {}
     };
   },
   computed: {
@@ -379,8 +381,37 @@ export default {
     filterSummary() {
       return generateFilterSummary(this.searchSettings);
     },
+    uriLabelsInDatasets(){
+      let labels = {}
+      for (let annotClass of this.datasetsAnnotations) {
+        for (let annotation of annotClass.children) {
+          labels[annotation.termUri] = annotation.termName
+        }
+      }
+      return labels
+    },
+    uriLabelsToUse(){
+      console.log('hey')
+      let uriLabels = {}
+
+
+      for ([key, value] of Object.entries( this.inferredTermsByCategory)){
+        uriLabels[key] = Object.keys(this.uriLabelsInDatasets)
+        .filter(key => value.includes(key))
+        .reduce((obj,key)=>{
+          obj[key] = this.uriLabelsInDatasets[key];return obj
+        },{})
+      }
+      return uriLabels
+    },
     filterDescription() {
-      return generateFilterDescription(this.searchSettings, this.inferredTermsByCategory);
+      let uriLabels = {}
+
+      for ([key,value] of Object.entries(this.uriLabelsToUse)){
+        uriLabels[key] = Object.values(value)
+      }
+
+      return generateFilterDescription(this.searchSettings,uriLabels);
     },
     datasetsAllExpanded() {
       return this.datasets.every(dataset => {
@@ -749,6 +780,22 @@ export default {
             this.setLastError(err);
           });
       }
+    },
+    inferredTermsByCategory:function(newVal){
+      // to deal with api call later. currently useless
+      let labelsInDatasets = this.uriLabelsInDatasets
+      let neededUris = Object.values(newVal).flatMap(a=>a);
+      
+
+      let missingUris = neededUris.filter(uri => {
+        return Object.keys(labelsInDatasets).indexOf(uri) <0;
+      })
+
+
+      missingUris[0]
+
+      console.log('im here');
+      // uriLabelsInDatasets
     }
   }
 };
